@@ -32,3 +32,52 @@
 例えばDBが変わったらユーザ作成の本質は変わっていないのにコードの変更が必要。
 この問題はリポジトリというパターンで解決できる。
 
+# 物流システムに見るドメインサービスの例
+ドメインサービスはデータストアと言ったインフラストラクチャが絡まないドメインオブジェクトの操作に徹したものが存在します。
+
+物流拠点 =輸送=> 物流拠点 =配送=> 配送先
+
+# 4-5-1 物流拠点のふるまいとして定義する
+```
+// 物流拠点エンティティ
+class PhysicalDistributionBase
+{
+    public function ship(Bagage $baggage): Baggage
+    {
+
+    }
+    public function receive(Bagage $baggage): Baggage
+    {
+
+    }
+
+    public function transport(PhysicalDistributionBase $to, Bagage $baggage)
+    {
+        $shippedBaggage = Ship($baggages);
+        to.Recive($shippedBaggage);
+
+        // 配送の記録
+    }
+}
+```
+物流拠点には出庫(ship)と入庫(recive)のふるまいがあります。
+輸送処理はどこに記述すべきでしょうか？
+物流拠点に書いた場合、物流拠点が他の物流拠点に直接荷物を渡すと言うのは少しぎこちなさを感じます、
+また、配送記録が必要となる場合もあります。それらが物流拠点オブジェクトによって執り行なわれるのは不自然です。
+
+# 4-5-2 輸送ドメインサービスを定義する　
+```
+class TransportService
+{
+    public function transport(PhysicalDistributionBase $to, Bagage $baggage)
+    {
+        $shippedBaggage = Ship($baggages);
+        to.Recive($shippedBaggage);
+
+        // 配送の記録
+    }
+}
+```
+輸送という概念は特定オブジェクトのふるまいとすると不都合がある振る舞いのようです。
+輸送を執り行うドメインサービスとすると違和感がない。
+このように、オブジェクトの定義としておさまらない場合、ドメインサービスとして切り出すのはあり。
